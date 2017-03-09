@@ -1,0 +1,200 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <script src="~/Content/jquery/jquery.js"></script>
+    <script src="~/Content/pgis/js/EzMapAPI.js" charset="GB2312"></script>
+    <script src="~/Content/pgis/js/EzServerClient.Extend.js"></script>
+    <script type="text/ng-template" id="infowindowTemplate">
+        <div style="width:400px;">
+            <div>test</div>
+            <div>
+                大鹅鹅刀锋打分法剧烈咳嗽的房间里<br />
+                看电视剧风里看见撒旦发了接撒登的<br />
+                你好刀锋大方阿道夫发顺丰斯蒂芬地<br />
+                方发大水斯蒂芬。
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript">
+
+        var myMap;
+        $(function () {
+            $("#btnGoCenter").click(function () {
+                myMap.gotoCenter();
+            });
+
+            $("#btnAddMarker").click(function () {
+                var pPoint = new Point($("#txtMarkerPoint").val());
+                var pIcon = new Icon();
+                pIcon.height = 28;
+                pIcon.width = 19;
+                pIcon.topOffset = -14;
+                pIcon.leftOffset = 0;
+                pIcon.image = "/Content/images/mapPosition/person.png";
+                var pTitle = new Title("test", 12, 1, null, "white", "#BB673F", "#FF7A00");
+                var marker = new Marker(pPoint, pIcon, pTitle);
+                marker.addListener("click", function () {
+                    marker.openInfoWindowHtml($("#infowindowTemplate").html());
+                });
+                myMap.addOverlay(marker);
+                myMap.centerAtLatLng(pPoint);
+
+            });
+
+            $("#btnAddPolyline").click(function () {
+                var pLine = new Polyline("120.74585,27.96654,120.74336,27.96526,120.74104,27.96427,120.73761,27.96184,120.7322,27.96351,120.72414,27.96807,120.72054,27.96929,120.71239,27.97195,120.70905,27.97301,120.71119,27.97711,120.71274,27.98097,120.71548,27.98051,120.71616,27.98172,120.71334,27.98271,120.71419,27.98438,120.70348,27.985,120.69859,27.98493,120.69825,27.99054,120.68994,27.99078,120.69045,27.98479,120.69045,27.9785,120.67898,27.97503", "#ff0000", 3, 1);// 构造一个多义线对象
+                var strMsg = "msg";
+                pLine.addListener("click", function () { pLine.openInfoWindowHtml(strMsg); });
+                myMap.addOverlay(pLine);// 将多义线对象添加到地图中
+                myMap.centerAtMBR(pLine.getMBR())
+            });
+
+            //添加矩形
+            $("#btnAddRectangle").click(function () {
+                var uRect = new Rectangle("120.59423, 27.93786, 120.8059, 28.06774", "ff00FF", 2, 0.5, "green");// 构造一个矩形对象
+                uRect.addListener("click", function () { uRect.openInfoWindowHtml("一个Rectangle"); });// 添加点击事件的响应
+                myMap.addOverlay(uRect);
+                var aa = uRect.getMBR();
+                var bb = myMap.getLevelOfMBR(aa.minX, aa.minY, aa.maxX, aa.maxY);
+                myMap.centerAtMBR(aa);
+                //myMap.zoomTo(bb);
+                //myMap.zoomOut();
+            })
+
+            $("#btnDragPan").click(function () {
+                myMap.changeDragMode('pan');
+            });
+
+            $("#btnDrawPoint").click(function () {
+                myMap.changeDragMode("drawPoint", $("#txtDrawData")[0], null, function (strPointCoord) {
+                    var pPoint = new Point(strPointCoord.toString());
+                    var pIcon = new Icon();
+                    pIcon.height = 28;
+                    pIcon.width = 19;
+                    pIcon.topOffset = -14;
+                    pIcon.leftOffset = 0;
+                    pIcon.image = "/Content/images/mapPosition/person.png";
+                    var marker = new Marker(pPoint, pIcon, null);
+                    marker.addListener("click", function () {
+                        marker.openInfoWindowHtml($("#infowindowTemplate").html());
+                    });
+                    myMap.addOverlay(marker);
+                });
+            });
+
+            $("#btnDrawPolyline").click(function () {
+                myMap.changeDragMode('drawPolyline', $("#txtDrawData")[0], null, function () {
+                    alert(arguments[0]);
+                });
+            });
+
+            $("#btnDrawRect").click(function () {
+                myMap.changeDragMode('drawRect', $("#txtDrawData")[0], null, function () {
+                    alert(arguments[0]);
+                });
+            });
+
+            $("#btnDrawCircle").click(function () {
+                myMap.changeDragMode('drawCircle', $("#txtDrawData")[0], null, function () {
+                    alert(arguments[0]);
+                });
+            });
+
+            $("#btnDragPolygon").click(function () {
+                myMap.changeDragMode('drawPolygon', $("#txtDrawData")[0], null, function () {
+                    alert(arguments[0]);
+                });
+            });
+
+            $("#map").width($(document).innerWidth() - 300);
+            $("#map").height($(document).innerHeight());
+            myMap = new EzMap(document.getElementById("map"));
+            //添加鹰眼
+            var ov = new OverView();// 构造鹰眼对象
+            ov.width = 200;// 设置鹰眼的宽度，单位为像素px
+            ov.height = 200;// 设置鹰眼的高度
+            myMap.addOverView(ov);// 添加鹰眼对象到地图对象中
+            myMap.showOverView();
+            //myMap.showMapCtrl();
+            //myMap.showStandMapControl();
+            myMap.showSmallMapControl();
+            //myMap.centerAndZoom(new Point(120.64822, 28.00952), 11);
+
+            myMap.addMapEventListener(EzEvent.MAP_MOUSEMOVE, function (e) {
+                document.getElementById("coordiate").innerHTML = "X:" + e.mapPoint.x + "  Y:" + e.mapPoint.y;
+            });
+
+            var arcgisolineUrl = "http://www.arcgisonline.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer";
+            var arcgisGroupLayer = new EzServerClient.GroupLayer("ArcGis Online", [new EzServerClient.Layer.ArcGISTileLayer("arcgisLayer", arcgisolineUrl)]);
+            myMap.addGroupLayer(arcgisGroupLayer);
+            var e6 = myMap.addMapEventListener(EzEvent.MAP_DBLCLICK, mapDblClickCallback);//_MapApp为EzMap的实例
+            //_MapApp.removeMapEventListener(e6);//从地图事件中注销上边函数的绑定
+            //_MapApp.clearMapInstanceEventListeners(EzEvent.MAP_DBLCLICK);//从EzEvent.MAP_DBLCLICK事件中注销所有的函数的绑定
+            //_MapApp.clearMapEventListeners();//从地图事件中注销全部的函数的绑定
+        });
+
+        function mapDblClickCallback(evt) {
+            //evt.stopPropagation();
+            //alert();
+            myMap.zoomAtPoint(evt.mapPoint, myMap.getZoomLevel() + 1)
+            /**
+            evt包含三个属性:
+                mapPoint {Point}: 鼠标左键双击处地图坐标
+                screenPoint {Point}:鼠标左键双击处的像素坐标
+                eventType {String}: 事件类型，此处为"mapdblclick"
+            */
+            //alert(evt.mapPoint + ";screenPoint:" + evt.screenPoint);
+        }
+    </script>
+    <style type="text/css">
+        .leftDiv {
+            float: left;
+        }
+
+            .leftDiv button {
+                margin-right: 5px;
+            }
+
+            .leftDiv ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+                .leftDiv ul li {
+                    margin: 10px;
+                    padding: 0;
+                }
+    </style>
+</head>
+<body style="margin:0;padding:0;">
+    <div class="leftDiv">
+        <ul>
+            <li id="coordiate"></li>
+            
+            <li><button id="btnGoCenter">对中地图</button></li>
+            <li><button id="btnAddMarker">添加标注</button><input type="text" id="txtMarkerPoint" value="120.68125,28.01806" /></li>
+            <li><button id="btnAddPolyline">添加线段</button></li>
+            <li><button id="btnAddRectangle">添加矩形</button></li>
+            <li><button id="btnAddPolygon">添加多边形</button></li>
+            <li><button id="btnDragPan">进行平移</button></li>
+            <li>
+                <button id="btnDrawPoint">绘制点</button><button id="btnDrawPolyline">绘制线</button><button id="btnDrawCircle">绘制圆形</button><br />
+                <button id="btnDrawRect">绘制矩形</button>
+                <button id="btnDragPolygon">绘制多边形</button><br />
+                <textarea id="txtDrawData" style="width:250px;height:50px; margin-top:5px;background-color:#eee;" readonly="readonly"></textarea>
+            </li>
+        </ul>
+    </div>
+    <div id="map" style="float:right;">
+    </div>
+</body>
+</html>

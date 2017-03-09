@@ -1,0 +1,241 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>MapTest</title>
+    <style type="text/css">
+        .left {
+            width: 250px;
+            float: left;
+        }
+
+        .right {
+            float: left;
+            width: calc(100% - 251px);
+            border-left: 1px solid rgb(178,178,178);
+        }
+
+        .left button {
+            margin-right: 5px;
+        }
+
+        .left ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+            .left ul li {
+                margin: 10px;
+                padding: 0;
+            }
+    </style>
+    <script src="~/Content/jquery/jquery.js"></script>
+    <script src="~/Content/pgis/js/EzMapAPI.js" charset="GB2312"></script>
+    <script src="~/Content/pgis/js/EzServerClient.Extend.js"></script>
+    <script src="~/Content/pgis/js/Map.js"></script>
+    <script type="text/javascript">
+        var pgisMap = null;
+        $(function () {
+            //设置地图容器的高度和宽度
+            $("#map").width($("#map").parent().width());
+            $("#map").height($(document).innerHeight());
+            pgisMap = new PGisMap(document.getElementById("map"));
+
+            //添加单个标注
+            $("#btnAddMarker").click(function () {
+                var strPoint = "120.85578,28.08929";
+                var vPoint = new Point(strPoint.split(',')[0], strPoint.split(',')[1]);
+                var marker = new Marker(vPoint, pgisMap.MarkerIcon.Person);
+                marker.addListener("click", function () {
+                    //marker.openInfoWindowHtml();
+                    pgisMap.myEzMap.removeOverlay(marker);
+                });
+                pgisMap.AddMarker(marker, true);
+            });
+
+            //添加多个标注
+            $("#btnAddMarkers").click(function () {
+                var strPoints = "120.66777,28.02311;120.67863,28.01445;120.69803,28.01805;120.65485,28.00672;120.69794,28.00269;120.67408,27.98664;120.72867,27.99058;120.61005,27.99213;120.6576,28.05273;120.67675,27.98088;120.67401,27.98619;120.6699,27.98635;120.66467,27.98658;120.66004,27.98606;120.65413,27.98653;120.65576,27.99229;120.65653,27.99524;120.6597,27.99812;120.66081,28.00099";
+                var markers = [];
+                for (var i = 0; i < strPoints.split(';').length; i++) {
+                    (function (j) {
+                        var g = strPoints.split(';')[j];
+                        var vPoint = new Point(g.split(',')[0], g.split(',')[1]);
+                        var marker = new Marker(vPoint, pgisMap.MarkerIcon.Person);
+                        marker.addListener("click", function () {
+                            marker.openInfoWindowHtml(j.toString());
+                        });
+                        markers.push(marker);
+                    })(i);
+                }
+                pgisMap.AddMarkers(markers);
+            });
+
+            //添加线条
+            $("#btnAddPolyline").click(function () {
+                var strPoints = "120.74585,27.96654,120.74336,27.96526,120.74104,27.96427,120.73761,27.96184,120.7322,27.96351,120.72414,27.96807,120.72054,27.96929,120.71239,27.97195,120.70905,27.97301,120.71119,27.97711,120.71274,27.98097,120.71548,27.98051,120.71616,27.98172,120.71334,27.98271,120.71419,27.98438,120.70348,27.985,120.69859,27.98493,120.69825,27.99054,120.68994,27.99078,120.69045,27.98479,120.69045,27.9785,120.67898,27.97503,120.67675,27.98035,120.67392,27.98611,120.67238,27.99392,120.67666,27.99437,120.6758,27.99763,120.68034,27.99846,120.6794,28.00308,120.67803,28.00922,120.68771,28.00822,120.68874,28.00322,120.69791,28.00282,120.69611,28.00836,120.70485,28.00827";
+                var pLine = new Polyline(strPoints, "#ff0000", 3, 0.8, 1);
+                pLine.addListener("click", function () {
+                    pLine.openInfoWindowHtml("");
+                });
+                pgisMap.myEzMap.addOverlay(pLine);
+                pgisMap.myEzMap.centerAtMBR(pLine.getMBR());
+            });
+
+            //添加矩形
+            $("#btnAddRectangle").click(function () {
+                var strPoints = "120.44582,28.00647,120.50693,28.04217";
+                var uRect = new Rectangle(strPoints, "ff00FF", 2, 0.5, "green");
+                uRect.addListener("click", function () {
+                    uRect.openInfoWindowHtml("");
+                });
+                pgisMap.myEzMap.addOverlay(uRect);
+                pgisMap.myEzMap.centerAtMBR(uRect.getMBR())
+            });
+
+            //添加圆
+            $("#btnAddCircle").click(function () {
+                var strPoints = "120.54954,27.98217,0.020022459888841486";
+                var uCircle = new Circle(strPoints, "ff00FF", 2, 0.5, "green");
+                uCircle.addListener("click", function () {
+                    uCircle.openInfoWindowHtml("");
+                });
+                pgisMap.myEzMap.addOverlay(uCircle);
+                pgisMap.myEzMap.centerAtLatLng(uCircle.getCenter());
+            });
+
+            //添加多边形
+            $("#btnAddPolygon").click(function () {
+                var strPoints = "120.64008,28.04934,120.63995,28.04877,120.63982,28.04836,120.63991,28.04756,120.63986,28.04726,120.63982,28.04692,120.63982,28.04623,120.63974,28.04593,120.63969,28.04548,120.64046,28.04502,120.64085,28.04495,120.64106,28.04457,120.64072,28.044,120.64064,28.04377,120.64128,28.04385,120.64136,28.04483,120.64153,28.04593,120.64291,28.04574,120.64492,28.046,120.64505,28.04732,120.64535,28.04831,120.64518,28.04895,120.64423,28.0496,120.64308,28.05028,120.64239,28.05078,120.64166,28.0507,120.64051,28.05108,120.64021,28.05033,120.64008,28.04934";
+                var pPolygon = new Polygon(strPoints, "#ff00FF", 2, 0.5, "green");
+                pPolygon.addListener("click", function () {
+                    pPolygon.openInfoWindowHtml("");
+                });
+                pgisMap.myEzMap.addOverlay(pPolygon);
+                pgisMap.myEzMap.centerAtMBR(pPolygon.getMBR());
+            });
+
+            //拉框查找
+            $("#btnDragRectangle").click(function () {
+                pgisMap.DrawRect(function (points) {
+                    var pointsArry = points.split(',');
+                    $.getJSON("/Default/GetRectData",
+                        {
+                            x1: pointsArry[0],
+                            y1: pointsArry[1],
+                            x2: pointsArry[2],
+                            y2: pointsArry[3]
+                        },
+                        function (data) {
+                            $.each(data, function (i, n) {
+                                var vPoint = new Point(n.X, n.Y);
+                                var marker = new Marker(vPoint, pgisMap.MarkerIcon.Person);
+                                pgisMap.AddMarker(marker, false);
+                            });
+                        });
+                });
+            });
+
+            //拉圆查找
+            $("#btnDragCircle").click(function () {
+                pgisMap.DrawCircle(function (points) {
+                    alert(points);
+                });
+            });
+
+            //绘制轨迹
+            $("#btnAddTrack").click(function () {
+                var strPoints = "120.67668, 27.8501, 120.67674, 27.84941, 120.67683, 27.84875, 120.6743, 27.84847, 120.67408, 27.84909, 120.67211, 27.84888, 120.67193, 27.84959, 120.6694, 27.84922, 120.6693, 27.85032, 120.66728, 27.84971, 120.66736, 27.85012, 120.66932, 27.8507, 120.66906, 27.8521, 120.66878, 27.85351, 120.67127, 27.85418, 120.67148, 27.85278, 120.67382, 27.85326, 120.67359, 27.85467, 120.67582, 27.85506, 120.67646, 27.85227, 120.67861, 27.85278, 120.67968, 27.85306";
+                var a = strPoints.split(',');
+                for (var i = 0; i < a.length; i++) {
+                    if (i < 2 || i % 2 != 0) {
+                        continue;
+                    }
+                    (function () {
+                        var pLine = new Polyline(a[i - 2] + "," + a[i - 1] + "," + a[i] + "," + a[i + 1], "#ff0000", 3, 0.8, 1);
+                        pgisMap.myEzMap.addOverlay(pLine);
+                    })();
+                }
+
+                //添加点位
+                var markers = [];
+                for (var i = 0; i < a.length; i++) {
+                    if (i % 2 != 0) {
+                        continue;
+                    }
+                    (function () {
+                        var vPoint = new Point(a[i], a[i + 1]);
+                        var marker = new Marker(vPoint, pgisMap.MarkerIcon.BaseStation);
+                        marker.addListener("click", function () {
+                            marker.openInfoWindowHtml("");
+                        });
+                        markers.push(marker);
+                    })()
+                }
+                pgisMap.AddMarkers(markers);
+            });
+
+            $("#btnTackPlayback").click(function () {
+                var strPoints = "120.67668, 27.8501, 120.67674, 27.84941, 120.67683, 27.84875, 120.6743, 27.84847, 120.67408, 27.84909, 120.67211, 27.84888, 120.67193, 27.84959, 120.6694, 27.84922, 120.6693, 27.85032, 120.66728, 27.84971, 120.66736, 27.85012, 120.66932, 27.8507, 120.66906, 27.8521, 120.66878, 27.85351, 120.67127, 27.85418, 120.67148, 27.85278, 120.67382, 27.85326, 120.67359, 27.85467, 120.67582, 27.85506, 120.67646, 27.85227, 120.67861, 27.85278, 120.67968, 27.85306";
+                var a = strPoints.split(',');
+                var arry = [];
+                for (var i = 0; i < a.length; i++) {
+                    if (i % 2 != 0) {
+                        continue;
+                    }
+                    arry.push({ "x": a[i], "y": a[i + 1] });
+                }
+                var flag = 0;
+                var timer = setInterval(function () {
+                    if (flag >= arry.length - 1) {
+                        clearInterval(timer);
+                        return;
+                    }
+                    AddLine(arry[flag].x, arry[flag].y, arry[flag + 1].x, arry[flag + 1].y);
+                    flag++;
+                }, 500);
+            });
+
+            //清除地图上所有的绘制和加入的对象
+            $("#btnClear").click(function () {
+                pgisMap.Clear();
+            });
+        });
+
+        //添加线路
+        function AddLine(x1, y1, x2, y2) {
+            var pLine = new Polyline(x1 + "," + y1 + "," + x2 + "," + y2, "#ff0000", 3, 0.8, 1);
+            pgisMap.myEzMap.addOverlay(pLine);
+        }
+    </script>
+
+</head>
+<body style="margin:0;padding:0;">
+    <div class="left">
+        <ul>
+            <li><button id="btnAddMarker">添加单个标注</button></li>
+            <li><button id="btnAddMarkers">添加多个标注</button></li>
+            <li><button id="btnAddPolyline">添加线</button></li>
+            <li><button id="btnAddCircle">添加圆</button></li>
+            <li><button id="btnAddRectangle">添加矩形</button></li>
+            <li><button id="btnAddPolygon">添加多边形</button></li>
+            <li><button id="btnDragRectangle">拉框查找</button></li>
+            <li><button id="btnDragCircle">拉圆查找</button></li>
+            <li><button id="btnAddTrack">绘制轨迹</button></li>
+            <li><button id="btnTackPlayback">轨迹回放</button></li>
+            <li><button id="btnClear">清空地图</button></li>
+        </ul>
+    </div>
+    <div class="right">
+        <div id="map">
+
+        </div>
+    </div>
+</body>
+</html>

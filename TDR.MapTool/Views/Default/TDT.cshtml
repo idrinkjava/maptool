@@ -1,0 +1,42 @@
+﻿
+@{
+    Layout = null;
+}
+
+<html>
+<head>
+    <style type="text/css">
+        .top {
+            height: calc(100% - 100px);
+        }
+
+            .top .left {
+                float: left;
+                width: 200px;
+                height: 100%;
+                background-color: purple;
+            }
+
+            .top .right {
+                float: right;
+                width: calc(100% - 200px);
+            }
+
+
+        .bottom {
+            height: 100px;
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="top">
+        <div class="left">11</div>
+        <div class="right">
+            <div style="height:50%;background-color:aqua">11</div>
+            <div style="height:50%;background-color:blue">11</div>
+        </div>
+    </div>
+    <div class="bottom">fooder</div>
+</body>
+</html>
