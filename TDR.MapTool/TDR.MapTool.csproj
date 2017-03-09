@@ -159,7 +159,6 @@
     <Content Include="Content\pgis\images\zoom-plus.gif" />
     <Content Include="Content\pgis\js\EzMapAPI.js" />
     <Content Include="Content\pgis\js\EzServerClient.Extend.js" />
-    <Content Include="Content\pgis\js\EzServerClient.js" />
     <Content Include="Content\pgis\images\mapControl\bg_bto.png" />
     <Content Include="Content\pgis\images\mapControl\bg_top.png" />
     <Content Include="Content\pgis\images\mapControl\city.png" />
@@ -213,6 +212,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Views\Default\Index.cshtml" />
+    <Content Include="Content\pgis\js\EzServerClient.js" />
     <None Include="Content\pgis\js\EzServerClient.gz.js.bak" />
     <Content Include="Content\jquery\jquery.min.map" />
     <Content Include="Views\Default\TDT.cshtml" />
