@@ -25,6 +25,15 @@ namespace TDR.MapTool.Controllers
             return View();
         }
 
+        public ActionResult Openlayer1()
+        {
+            return View();
+        }
+
+        public ActionResult Openlayer2()
+        {
+            return View();
+        }
 
 
         public ActionResult TDT()

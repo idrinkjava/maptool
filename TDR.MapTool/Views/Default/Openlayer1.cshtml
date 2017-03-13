@@ -1,0 +1,112 @@
+﻿@{
+    Layout = null;
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>创建不同的Feature类实例 ———— 在电子地图上绘制Feature对象实例的方式有两种，一种是使用默认方式（但在相应的CSS表中也可以更换图片），另一种是自己做图片，并根据用户选择来响应在电子地图上创建的不同Feature类实例请求</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.0.1/css/ol.css" type="text/css">
+    <!--本页中的样式表-->
+    <style type="text/css">
+        <!-- 显示电子地图DIV的样式控制-- > #map {
+            width: 512px;
+            height: 512px;
+            border: 1px solid gray;
+        }
+        <!-- Rediod对象的样式表，是用来判断用户请求状态的Readio-- > #controlToggle li {
+            list-style: none;
+        }
+
+        p {
+            width: 512px;
+        }
+    </style>
+    <!--引入OpenLayers.js文件的路径地址，就像使用Portotype.js一样-->
+    @*<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>*@
+    <script src="https://openlayers.org/en/v4.0.1/build/ol.js"></script>
+    <script type="text/javascript">
+        var map, drawControls;
+        OpenLayers.Util.onImageLoadErrorColor = "transparent";
+
+        //自动加载的函数开始
+        function init() {
+            map = new OpenLayers.Map('map');//必须实例化的Map对象，是电子地图成图和其它一切用户请求和服务器相应的前提。
+
+            //实例化的Layer.WMS对象，一个必要的基本电子地图数据图层
+            var wmsLayer = new OpenLayers.Layer.WMS(
+                "BasicLayer",//图层名称，将显示在图层控制器（我自己起的名字）中的图层名称。程序员自己根据业务需求定义。
+                "http://labs.metacarta.com/wms/vmap0?",//指向解析用户请求的电子地图服务器地址和文件，绝大部分情况下是一个.xml或者是.jsp文件,如果你用自己的Geoserver服务器来解析用户请求的话，应该是“/geoserver/wms”地址，并在”geoserver\WEB-INF\pages“和“geoserver\WEB-INF\pages\wms”文件夹中看到一些相应的文件。
+                { layers: 'basic' }//被调用的电子地图数据库或者相关数据文件的ID。如果是通过GeoServer来运行电子地图服务，那么比较简单的方式是在Geoserver的管理系统中进行配置，由于配置出文件都会写在“catalog.xml”文件中，其中你可以找到数据源的具体地址，当然，如果我们能直接写“catalog.xml”文件的话，效果会更好、更快、更安全。一般都用Shape数据文件或者是一些Coverage的tiff/gis/png/jpg图，因为比较简单，但是效率比较低。也可以是PostSQL/GIS数据，等等。
+            );
+
+            var pointLayer = new OpenLayers.Layer.Vector("Point Layer");//实例化的Layer.Vector对象，用来画点（Point）。当然，如果可以根据你的业务需要，把点、线、面都画在一个Layer.Vector对象上面。
+            var lineLayer = new OpenLayers.Layer.Vector("Line Layer");//实例化的Layer.Vector对象，用来线（Line）当然。如果可以根据你的业务需要，把点、线、面都画在一个Layer.Vector对象上面。
+            var polygonLayer = new OpenLayers.Layer.Vector("Polygon Layer");//实例化的Layer.Vector对象，用来多边形（Polygon）。当然，如果可以根据你的业务需要，把点、线、面都画在一个Layer.Vector对象上面。
+
+            map.addLayers([wmsLayer, pointLayer, lineLayer, polygonLayer]);//在实例化的Map对象中增加进入BasicLayer、Point Layer、Line Layer、Polygon Layer图层。
+            map.addControl(new OpenLayers.Control.LayerSwitcher());//在实例化的Map对象中增加进入Control.LayerSwitcher控制器，用来控制电子地图的放大、缩小等等。当然，控制电子地图还有别的方法，你可以自己尝试尝试。
+            map.addControl(new OpenLayers.Control.MousePosition());//在实例化的Map对象中增加进入Control.MousePosition控制器，用来在地图右下角显示鼠标所在电子地图上面的经度、纬度坐标。
+
+            var options = { handlerOptions: { freehand: true } };
+
+            //在电子地图Layer.Vector层上绘制各种Feature对象。
+            drawControls = {
+                point: new OpenLayers.Control.DrawFeature(pointLayer,
+                    OpenLayers.Handler.Point),//绘制点的方法
+                line: new OpenLayers.Control.DrawFeature(lineLayer,
+                    OpenLayers.Handler.Path, options),//绘制面的方法
+                polygon: new OpenLayers.Control.DrawFeature(polygonLayer,
+                    OpenLayers.Handler.Polygon, options)//绘制多边形的方法
+            };
+
+            //把程序员写的（不是自己开发的，也是利用OpenLayer API）绘制各种Feature对象的方法，分别增加在电子地图上，以便用户才可以使用这些方法。这里只有三个具体方法：1、point，2、line，3、polygon。此段程序和上段程序配合，结构设计的很巧妙，利用的Prototype.js的程序设计优势（其实就是高级的JavaScript），为后期的方法扩展提供便利，如果你需要增加新方法，你只要在drawControls函数体内增加方法就行了，很方便，修改量也小。
+            for (var key in drawControls) {
+                map.addControl(drawControls[key]);
+            }
+
+            map.setCenter(new OpenLayers.LonLat(0, 0), 3);//设定电子地图显示时，默然电子地图中心点。
+
+            document.getElementByIdx('noneToggle').checked = true;
+        }
+        //自动加载的函数结束
+
+        //判断用户请求的函数，也就是用户选择的是那个ID的Redio对象,element参数其实就是Redio ID
+        function toggleControl(element) {
+            for (key in drawControls) {
+                var control = drawControls[key];
+                if (element.value == key && element.checked) {
+                    control.activate();//activate()是OpenLayers中的一个方法，返回一个布尔值，用来激活方法。与else中的deactivate()配合，如果被激化的状态下则请求保持不变。
+                } else {
+                    control.deactivate();//activate()是OpenLayers中的一个方法，返回一个布尔值，用来关闭方法。与if中的activate()配合，如果转变了别的请求，则上一个请求被关闭。
+                }
+            }
+        }
+    </script>
+</head>
+<body onload="init()">
+    <h1 id="title">OpenLayers Draw Feature Example</h1>
+    <div id="tags"></div>
+    <p id="shortdesc">
+        在电子地图上创建点(Point)、线（line,在OpenLayers中的具体方法是OpenLayers.Handler.Path中的Path内置方法，Path方法实际上执行一个函数），面（Ploygon多面形）的例子。
+    </p>
+    <div id="map"></div>
+    <ul id="controlToggle">
+        <li>
+            <input type="radio" name="type" value="none" id="noneToggle" onclick="toggleControl(this);" checked="checked" />
+            <label for="noneToggle">navigate</label>
+        </li>
+        <li>
+            <input type="radio" name="type" value="point" id="pointToggle" onclick="toggleControl(this);" />
+            <label for="pointToggle">draw point</label>
+        </li>
+        <li>
+            <input type="radio" name="type" value="line" id="lineToggle" onclick="toggleControl(this);" />
+            <label for="lineToggle">draw line</label>
+        </li>
+        <li>
+            <input type="radio" name="type" value="polygon" id="polygonToggle" onclick="toggleControl(this);" />
+            <label for="polygonToggle">draw polygon</label>
+        </li>
+    </ul>
+</body>
+</html>
