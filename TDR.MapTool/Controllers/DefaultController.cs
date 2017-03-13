@@ -20,6 +20,13 @@ namespace TDR.MapTool.Controllers
             return View();
         }
 
+        public ActionResult Openlayer()
+        {
+            return View();
+        }
+
+
+
         public ActionResult TDT()
         {
             return View();

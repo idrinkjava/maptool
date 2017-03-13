@@ -1,0 +1,73 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WMTS</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.0.1/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.0.1/build/ol.js"></script>
+</head>
+<body>
+    <div id="map" class="map"></div>
+    <script>
+        var projection = ol.proj.get('EPSG:4326');
+        var projectionExtent = projection.getExtent();
+        var size = ol.extent.getWidth(projectionExtent) / 256;
+        var resolutions = new Array(18);
+        var matrixIds = new Array(18);
+        for (var z = 0; z <= 18; ++z) {
+            resolutions[z] = size / Math.pow(2, z);
+            matrixIds[z] = z;
+        }
+        var map = new ol.Map({
+            logo: false,
+            layers: [
+            new ol.layer.Tile({
+                name: "baseVec",
+                source: new ol.source.WMTS({
+                    url: 'http://t{0-7}.tianditu.com/vec_c/wmts',
+                    layer: 'vec',
+                    format: 'tiles',
+                    tileGrid: new ol.tilegrid.WMTS({
+                        origin: ol.extent.getTopLeft(projectionExtent),
+                        resolutions: resolutions,
+                        matrixIds: matrixIds,
+                    }),
+                    matrixSet: "c", style: 'default'
+                })
+            }),
+            new ol.layer.Tile({
+                name: "baseVec1",
+                source: new ol.source.WMTS({
+                    url: 'http://t{0-7}.tianditu.com/cva_c/wmts',
+                    layer: 'cva',
+                    format: 'tiles',
+                    tileGrid: new ol.tilegrid.WMTS({
+                        origin: ol.extent.getTopLeft(projectionExtent),
+                        resolutions: resolutions,
+                        matrixIds: matrixIds,
+                    }),
+                    matrixSet: "c", style: 'default'
+                })
+            })
+            ],
+            target: 'map',
+            controls: ol.control.defaults({
+                attributionOptions: ({
+                    collapsible: false
+                })
+            }),
+            view: new ol.View({
+                center: [121.00228, 29.14696],
+                projection: ol.proj.get("EPSG:4326"),
+                zoom: 14
+            })
+        });
+
+    </script>
+</body>
+</html>
