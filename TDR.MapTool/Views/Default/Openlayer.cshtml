@@ -109,14 +109,14 @@
                 var feature = new ol.Feature({
                     geometry: new ol.geom.LineString(
                         [[120.45937220611572, 30.09847206359863],
-                         [120.46546618499755, 30.09563965087891],
-                         [120.46546618499755, 30.09563965087891],
-                         [120.47447840728759, 30.091519777832033],
-                         [120.47816912689208, 30.092463915405276],
-                         [120.48091570892333, 30.09538215881348],
-                         [120.48185984649658, 30.09563965087891],
-                         [120.4872671798706, 30.094266359863283],
-                         [120.4898421005249, 30.0938372064209],
+                        [120.46546618499755, 30.09563965087891],
+                        [120.46546618499755, 30.09563965087891],
+                        [120.47447840728759, 30.091519777832033],
+                        [120.47816912689208, 30.092463915405276],
+                        [120.48091570892333, 30.09538215881348],
+                        [120.48185984649658, 30.09563965087891],
+                        [120.4872671798706, 30.094266359863283],
+                        [120.4898421005249, 30.0938372064209],
                         [120.49593607940673, 30.092549746093752],
                         [120.49636523284912, 30.092721407470705],
                         [120.49782435455322, 30.096412127075197]], "XY")
@@ -175,7 +175,7 @@
                 });
                 draw.on("drawend", function (obj) {
                     var strPoints = "";
-                    for (var i = 0, arryPoints = obj.feature.getGeometry().getCoordinates() ; i < arryPoints.length; i++) {
+                    for (var i = 0, arryPoints = obj.feature.getGeometry().getCoordinates(); i < arryPoints.length; i++) {
                         strPoints += arryPoints[i][0] + "," + arryPoints[i][1] + ";";
                     }
                     $('#txtDrawData').val(strPoints.substring(0, strPoints.length - 1));
@@ -193,9 +193,9 @@
             var projection = ol.proj.get('EPSG:4326');
             var projectionExtent = projection.getExtent();
             var size = ol.extent.getWidth(projectionExtent) / 256;
-            var resolutions = new Array(18);
-            var matrixIds = new Array(18);
-            for (var z = 0; z <= 18; ++z) {
+            var resolutions = new Array(22);
+            var matrixIds = new Array(22);
+            for (var z = 0; z <= 22; ++z) {
                 resolutions[z] = size / Math.pow(2, z);
                 matrixIds[z] = z;
             }
@@ -245,6 +245,102 @@
             });
             map.addControl(new ol.control.MousePosition());
             map.addControl(new ol.control.ZoomSlider());
+            map.getView().on("change:resolution", function () {
+                var zoom = map.getView().getZoom();
+                if (!(typeof zoom === 'number' && zoom % 1 === 0)) {
+                    return;
+                }
+                console.log(zoom);
+                if (zoom <= 14) {
+                    var s1 = new ol.source.WMTS({
+                        url: 'http://t{0-7}.tianditu.com/vec_c/wmts',
+                        layer: 'vec',
+                        format: 'tiles',
+                        tileGrid: new ol.tilegrid.WMTS({
+                            origin: ol.extent.getTopLeft(projectionExtent),
+                            resolutions: resolutions,
+                            matrixIds: matrixIds,
+                        }),
+                        matrixSet: "c", style: 'default'
+                    });
+                    var l1 = map.getLayers().getArray()[0];
+                    l1.setSource(s1);
+
+                    var s2 = new ol.source.WMTS({
+                        url: 'http://t{0-7}.tianditu.com/cva_c/wmts',
+                        layer: 'cva',
+                        format: 'tiles',
+                        tileGrid: new ol.tilegrid.WMTS({
+                            origin: ol.extent.getTopLeft(projectionExtent),
+                            resolutions: resolutions,
+                            matrixIds: matrixIds,
+                        }),
+                        matrixSet: "c", style: 'default'
+                    });
+                    var l2 = map.getLayers().getArray()[1];
+                    l2.setSource(s2);
+                }
+                else if (zoom >= 15 && zoom <= 17) {
+                    var s1 =  new ol.source.WMTS({
+                        url: 'http://srv.zjditu.cn/ZJEMAP_2D/wmts',
+                        layer: 'vec',
+                        format: 'tiles',
+                        tileGrid: new ol.tilegrid.WMTS({
+                            origin: ol.extent.getTopLeft(projectionExtent),
+                            resolutions: resolutions,
+                            matrixIds: matrixIds,
+                        }),
+                        style: 'default'
+                    });
+                    var l1 = map.getLayers().getArray()[0];
+                    l1.setSource(s1);
+
+                    var s2 = new ol.source.WMTS({
+                        url: 'http://srv.zjditu.cn/ZJEMAPANNO_2D/wmts',
+                        layer: 'cva',
+                        format: 'tiles',
+                        tileGrid: new ol.tilegrid.WMTS({
+                            origin: ol.extent.getTopLeft(projectionExtent),
+                            resolutions: resolutions,
+                            matrixIds: matrixIds,
+                        }),
+                        style: 'default'
+                    });
+                    var l2 = map.getLayers().getArray()[1];
+                    l2.setSource(s2);
+                } else {
+                    var s1 = new ol.source.WMTS({
+                        url: 'http://srv.tianditusx.cn/KQEMAP/wmts.asmx/wmts',
+                        layer: 'KQEMAP',
+                        format: 'image/png',
+                        matrixSet:"TileMatrixSet0",
+                        tileGrid: new ol.tilegrid.WMTS({
+                            origin: ol.extent.getTopLeft(projectionExtent),
+                            resolutions: resolutions,
+                            matrixIds: matrixIds,
+                        }),
+                        style: 'default'
+                    });
+                    var l1 = map.getLayers().getArray()[0];
+                    l1.setSource(s1);
+
+                    var s2 = new ol.source.WMTS({
+                        url: 'http://srv.tianditusx.cn/KQEMAPANNO/wmts.asmx/wmts',
+                        layer: 'KQEMAPANNO',
+                        format: 'image/png',
+                        matrixSet: "TileMatrixSet0",
+                        tileGrid: new ol.tilegrid.WMTS({
+                            origin: ol.extent.getTopLeft(projectionExtent),
+                            resolutions: resolutions,
+                            matrixIds: matrixIds,
+                        }),
+                        style: 'default'
+                    });
+                    var l2 = map.getLayers().getArray()[1];
+                    l2.setSource(s2);
+                }
+                map.render();
+            });
         }
     </script>
 </body>
