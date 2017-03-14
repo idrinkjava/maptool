@@ -1,0 +1,108 @@
+﻿@{
+
+    Layout = null;
+}
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>GIS开发样例-V1.0</title>
+    <meta content="Copyright (c) Leetao" name="copyright">
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.0.1/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.0.1/build/ol.js"></script>
+</head>
+<body>
+    <div id="map" class="map"></div>
+    <form class="form-inline">
+        <label>Geometry type &nbsp;</label>
+        <select id="type">
+            <option value="None">None</option>
+            <option value="Point">Point</option>
+            <option value="LineString">LineString</option>
+            <option value="Polygon">Polygon</option>
+        </select>
+    </form>
+    <script>
+        var source = new ol.source.Vector();
+
+        var vector = new ol.layer.Vector({
+            source: source
+        });
+        var projection = ol.proj.get('EPSG:4326');
+        var projectionExtent = projection.getExtent();
+        var size = ol.extent.getWidth(projectionExtent) / 256;
+        var resolutions = new Array(18);
+        var matrixIds = new Array(18);
+        for (var z = 0; z <= 18; ++z) {
+            resolutions[z] = size / Math.pow(2, z);
+            matrixIds[z] = z;
+        }
+        var map = new ol.Map({
+            view: new ol.View({
+                center: [0, 0],
+                zoom: 2
+            }),
+            layers: [
+           new ol.layer.Tile({
+               name: "baseVec",
+               source: new ol.source.WMTS({
+                   url: 'http://t{0-7}.tianditu.com/vec_c/wmts',
+                   layer: 'vec',
+                   format: 'tiles',
+                   tileGrid: new ol.tilegrid.WMTS({
+                       origin: ol.extent.getTopLeft(projectionExtent),
+                       resolutions: resolutions,
+                       matrixIds: matrixIds,
+                   }),
+                   matrixSet: "c", style: 'default'
+               })
+           })
+          //  vector              //(2)
+            ],
+            target: 'map'
+        });
+        //featureOverlay
+        var featureOverlay = new ol.FeatureOverlay({
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ffcc33',
+                    width: 2
+                }),
+                image: new ol.style.Circle({
+                    radius: 7,
+                    fill: new ol.style.Fill({
+                        color: '#ffcc33'
+                    })
+                })
+            }),
+        }
+        );
+        featureOverlay.setMap(map);
+
+        var typeSelect = document.getElementById('type');
+
+        var draw;
+        function addInteraction() {
+            var value = typeSelect.value;
+            if (value !== 'None') {
+                draw = new ol.interaction.Draw({
+                    features: featureOverlay.getFeatures(),     // (1)
+                    source: source,
+                    type:  (value)
+                });
+                map.addInteraction(draw);
+            }
+        }
+        typeSelect.onchange = function(e) {
+            map.removeInteraction(draw);
+            addInteraction();
+        };
+
+        addInteraction();
+    </script>
+</body>
+</html>

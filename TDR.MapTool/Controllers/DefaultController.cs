@@ -35,6 +35,11 @@ namespace TDR.MapTool.Controllers
             return View();
         }
 
+        public ActionResult Openlayer3()
+        {
+            return View();
+        }
+
 
         public ActionResult TDT()
         {

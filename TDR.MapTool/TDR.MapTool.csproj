@@ -195,8 +195,8 @@
     <Content Include="Content\images\mapPosition\baseStation_on.png" />
     <Content Include="Content\images\mapPosition\person.png" />
     <Content Include="Content\images\mapPosition\person_on.png" />
-    <Content Include="Content\images\mapPosition\policeCabinet .png" />
-    <Content Include="Content\images\mapPosition\policeCabinet _on.png" />
+    <Content Include="Content\images\mapPosition\policeCabinet.png" />
+    <Content Include="Content\images\mapPosition\policeCabinet_on.png" />
     <Content Include="Content\images\mapPosition\test.png" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
@@ -204,6 +204,9 @@
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\openlayer\ol-debug.js" />
+    <Content Include="Scripts\openlayer\ol.css" />
+    <Content Include="Scripts\openlayer\ol.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -230,12 +233,14 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Default\Openlayer.cshtml" />
+    <None Include="Views\Default\Openlayer.cshtml.bak" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Views\Default\Openlayer1.cshtml" />
     <Content Include="Views\Default\Openlayer2.cshtml" />
+    <Content Include="Views\Default\Openlayer3.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
