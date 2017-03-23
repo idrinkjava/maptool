@@ -41,6 +41,9 @@
     <div>
         <div class="leftDiv">
             <ul>
+                <li><button id="btnAddZEWGLayer">叠加所有责任网格图层</button></li>
+                <li><button id="btnRemoveZEWGLayer">移除所有责任网格图层</button></li>
+                <li><button id="btnAddFeatureLayer">叠加责任网格矢量图</button></li>
                 <li><button id="btnAddMarker">添加单个标注</button></li>
                 <li><button id="btnAddPolyline">添加线</button></li>
                 <li><button id="btnAddCircle">添加圆</button></li>
@@ -66,6 +69,8 @@
     <script type="text/javascript" src="~/Scripts/jquery-1.10.2.min.js"></script>
     <script type="text/javascript">
         var map;
+        var tileLayerSource1, tileLayerSource2, tileLayerSource3, tileLayerSource4, tileLayerSource5, tileLayerSource6;
+        var arcgisLayer;
         $(function () {
             //计算map容器的高度和宽度
             $("#map").height($(document).innerHeight());
@@ -73,10 +78,80 @@
             //初始化地图
             initMap();
 
+            //叠加所有责任网格图层
+            $("#btnAddZEWGLayer").click(function () {
+                if (!arcgisLayer) {
+                    arcgisLayer = new ol.layer.Tile({
+                        source: new ol.source.TileArcGISRest({
+                            url: "http://10.80.2.155/ArcGIS/rest/services/zrwg/MapServer/"
+                        })
+                    });
+                }
+                var layers = map.getLayers().getArray();
+                for (var i = 0; i < layers.length; i++) {
+                    if (layers[i] == arcgisLayer) {
+                        map.removeLayer(arcgisLayer);
+                    }
+                }
+                map.addLayer(arcgisLayer);
+            });
+
+            //移除所有责任网格图层
+            $("#btnRemoveZEWGLayer").click(function () {
+                var layers = map.getLayers().getArray();
+                for (var i = 0; i < layers.length; i++) {
+                    if (layers[i] == arcgisLayer) {
+                        map.removeLayer(arcgisLayer);
+                    }
+                }
+            });
+
+            //添加矢量图层
+            $("#btnAddFeatureLayer").click(function () {
+                var projection = ol.proj.get('CGCS_2000_GK_120_3N');
+                var esrijsonFormat = new ol.format.EsriJSON();
+                var vectorSource = new ol.source.Vector();
+                var url = "http://10.80.2.155/ArcGIS/rest/services/kq20170323/MapServer/128/query?text=%E7%83%AD%E5%8A%9B&geometry=&geometryType=esriGeometryPoint&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&objectIds=&where=&time=&returnIdsOnly=false&returnGeometry=true&maxAllowableOffset=&outSR=&outFields=&f=pjson";
+                $.ajax({
+                    url: url, dataType: 'jsonp', success: function (response) {
+                        if (response.error) {
+                            alert(response.error.message + '\n' +
+                                response.error.details.join('\n'));
+                        } else {
+                            var features = esrijsonFormat.readFeatures(response);
+                            if (features.length > 0) {
+                                vectorSource.addFeatures(features);
+                            }
+                            var vector = new ol.layer.Vector({
+                                source: vectorSource,
+                                style: new ol.style.Style({
+                                    fill: new ol.style.Fill({
+                                        color: 'rgba(222, 81, 29, 0.6)'
+                                    }),
+                                    stroke: new ol.style.Stroke({
+                                        color: 'rgba(255, 0, 255, 1)',
+                                        width: 4
+                                    }),
+                                    image: new ol.style.Circle({
+                                        radius: 7,
+                                        snapToPixel: false,
+                                        fill: new ol.style.Fill({ color: 'black' }),
+                                        stroke: new ol.style.Stroke({
+                                            color: 'white', width: 2
+                                        })
+                                    })
+                                })
+                            });
+                            map.addLayer(vector);
+                        }
+                    }
+                });
+            });
+
             //添加标注
             $("#btnAddMarker").click(function () {
                 var iconFeature = new ol.Feature({
-                    geometry: new ol.geom.Point([120.49040, 30.08431]),
+                    geometry: new ol.geom.Point([120.42747309716121, 30.096535068597046]),
                     name: 'test marker'
                 });
 
@@ -175,7 +250,7 @@
                 });
                 draw.on("drawend", function (obj) {
                     var strPoints = "";
-                    for (var i = 0, arryPoints = obj.feature.getGeometry().getCoordinates(); i < arryPoints.length; i++) {
+                    for (var i = 0, arryPoints = obj.feature.getGeometry().getCoordinates() ; i < arryPoints.length; i++) {
                         strPoints += arryPoints[i][0] + "," + arryPoints[i][1] + ";";
                     }
                     $('#txtDrawData').val(strPoints.substring(0, strPoints.length - 1));
@@ -193,42 +268,89 @@
             var projection = ol.proj.get('EPSG:4326');
             var projectionExtent = projection.getExtent();
             var size = ol.extent.getWidth(projectionExtent) / 256;
-            var resolutions = new Array(22);
-            var matrixIds = new Array(22);
-            for (var z = 0; z <= 22; ++z) {
+            var resolutions = new Array(20);
+            var matrixIds = new Array(20);
+            for (var z = 0; z < 20; ++z) {
                 resolutions[z] = size / Math.pow(2, z);
                 matrixIds[z] = z;
             }
+            tileLayerSource1 = new ol.source.WMTS({
+                url: 'http://t{0-7}.tianditu.com/vec_c/wmts',
+                layer: 'vec',
+                format: 'tiles',
+                tileGrid: new ol.tilegrid.WMTS({
+                    origin: ol.extent.getTopLeft(projectionExtent),
+                    resolutions: resolutions,
+                    matrixIds: matrixIds,
+                }),
+                matrixSet: "c", style: 'default'
+            });
+            tileLayerSource2 = new ol.source.WMTS({
+                url: 'http://t{0-7}.tianditu.com/cva_c/wmts',
+                layer: 'cva',
+                format: 'tiles',
+                tileGrid: new ol.tilegrid.WMTS({
+                    origin: ol.extent.getTopLeft(projectionExtent),
+                    resolutions: resolutions,
+                    matrixIds: matrixIds,
+                }),
+                matrixSet: "c", style: 'default'
+            });
+            tileLayerSource3 = new ol.source.WMTS({
+                url: 'http://srv.zjditu.cn/ZJEMAP_2D/wmts',
+                layer: 'vec',
+                format: 'tiles',
+                tileGrid: new ol.tilegrid.WMTS({
+                    origin: ol.extent.getTopLeft(projectionExtent),
+                    resolutions: resolutions,
+                    matrixIds: matrixIds,
+                }),
+                matrixSet: "c", style: 'default'
+            });
+            tileLayerSource4 = new ol.source.WMTS({
+                url: 'http://srv.zjditu.cn/ZJEMAPANNO_2D/wmts',
+                layer: 'cva',
+                format: 'tiles',
+                tileGrid: new ol.tilegrid.WMTS({
+                    origin: ol.extent.getTopLeft(projectionExtent),
+                    resolutions: resolutions,
+                    matrixIds: matrixIds,
+                }),
+                matrixSet: "c", style: 'default'
+            });
+            tileLayerSource5 = new ol.source.WMTS({
+                url: 'http://srv.tianditusx.cn/KQEMAP/wmts.asmx/wmts',
+                layer: 'KQEMAP',
+                format: 'image/png',
+                tileGrid: new ol.tilegrid.WMTS({
+                    origin: ol.extent.getTopLeft(projectionExtent),
+                    resolutions: resolutions,
+                    matrixIds: matrixIds,
+                }),
+                matrixSet: "TileMatrixSet0", style: 'default'
+            });
+            tileLayerSource6 = new ol.source.WMTS({
+                url: 'http://srv.tianditusx.cn/KQEMAPANNO/wmts.asmx/wmts',
+                layer: 'KQEMAPANNO',
+                format: 'image/png',
+                tileGrid: new ol.tilegrid.WMTS({
+                    origin: ol.extent.getTopLeft(projectionExtent),
+                    resolutions: resolutions,
+                    matrixIds: matrixIds,
+                }),
+                matrixSet: "TileMatrixSet0", style: 'default'
+            });
+
             map = new ol.Map({
                 logo: false,
                 layers: [
                     new ol.layer.Tile({
                         name: "baseVec",
-                        source: new ol.source.WMTS({
-                            url: 'http://t{0-7}.tianditu.com/vec_c/wmts',
-                            layer: 'vec',
-                            format: 'tiles',
-                            tileGrid: new ol.tilegrid.WMTS({
-                                origin: ol.extent.getTopLeft(projectionExtent),
-                                resolutions: resolutions,
-                                matrixIds: matrixIds,
-                            }),
-                            matrixSet: "c", style: 'default'
-                        })
+                        source: tileLayerSource1
                     }),
                     new ol.layer.Tile({
                         name: "baseCva",
-                        source: new ol.source.WMTS({
-                            url: 'http://t{0-7}.tianditu.com/cva_c/wmts',
-                            layer: 'cva',
-                            format: 'tiles',
-                            tileGrid: new ol.tilegrid.WMTS({
-                                origin: ol.extent.getTopLeft(projectionExtent),
-                                resolutions: resolutions,
-                                matrixIds: matrixIds,
-                            }),
-                            matrixSet: "c", style: 'default'
-                        })
+                        source: tileLayerSource2
                     })
                 ],
                 target: 'map',
@@ -240,11 +362,19 @@
                 view: new ol.View({
                     center: [120.49038, 30.08370],
                     projection: ol.proj.get("EPSG:4326"),
-                    zoom: 14
+                    zoom: 14,
+                    minZoom: 1,
+                    maxZoom: 20
                 })
             });
             map.addControl(new ol.control.MousePosition());
-            map.addControl(new ol.control.ZoomSlider());
+            map.addControl(new ol.control.FullScreen());
+            map.addControl(new ol.control.Zoom());
+            map.addControl(new ol.control.ZoomToExtent());
+            map.addControl(new ol.control.ZoomSlider({
+                minResolution: resolutions[1],
+                maxResolution: resolutions[19]
+            }));
             map.getView().on("change:resolution", function () {
                 var zoom = map.getView().getZoom();
                 if (!(typeof zoom === 'number' && zoom % 1 === 0)) {
@@ -252,94 +382,22 @@
                 }
                 console.log(zoom);
                 if (zoom <= 14) {
-                    var s1 = new ol.source.WMTS({
-                        url: 'http://t{0-7}.tianditu.com/vec_c/wmts',
-                        layer: 'vec',
-                        format: 'tiles',
-                        tileGrid: new ol.tilegrid.WMTS({
-                            origin: ol.extent.getTopLeft(projectionExtent),
-                            resolutions: resolutions,
-                            matrixIds: matrixIds,
-                        }),
-                        matrixSet: "c", style: 'default'
-                    });
                     var l1 = map.getLayers().getArray()[0];
-                    l1.setSource(s1);
-
-                    var s2 = new ol.source.WMTS({
-                        url: 'http://t{0-7}.tianditu.com/cva_c/wmts',
-                        layer: 'cva',
-                        format: 'tiles',
-                        tileGrid: new ol.tilegrid.WMTS({
-                            origin: ol.extent.getTopLeft(projectionExtent),
-                            resolutions: resolutions,
-                            matrixIds: matrixIds,
-                        }),
-                        matrixSet: "c", style: 'default'
-                    });
+                    l1.setSource(tileLayerSource1);
                     var l2 = map.getLayers().getArray()[1];
-                    l2.setSource(s2);
+                    l2.setSource(tileLayerSource2);
                 }
                 else if (zoom >= 15 && zoom <= 17) {
-                    var s1 =  new ol.source.WMTS({
-                        url: 'http://srv.zjditu.cn/ZJEMAP_2D/wmts',
-                        layer: 'vec',
-                        format: 'tiles',
-                        tileGrid: new ol.tilegrid.WMTS({
-                            origin: ol.extent.getTopLeft(projectionExtent),
-                            resolutions: resolutions,
-                            matrixIds: matrixIds,
-                        }),
-                        style: 'default'
-                    });
                     var l1 = map.getLayers().getArray()[0];
-                    l1.setSource(s1);
-
-                    var s2 = new ol.source.WMTS({
-                        url: 'http://srv.zjditu.cn/ZJEMAPANNO_2D/wmts',
-                        layer: 'cva',
-                        format: 'tiles',
-                        tileGrid: new ol.tilegrid.WMTS({
-                            origin: ol.extent.getTopLeft(projectionExtent),
-                            resolutions: resolutions,
-                            matrixIds: matrixIds,
-                        }),
-                        style: 'default'
-                    });
+                    l1.setSource(tileLayerSource3);
                     var l2 = map.getLayers().getArray()[1];
-                    l2.setSource(s2);
+                    l2.setSource(tileLayerSource4);
                 } else {
-                    var s1 = new ol.source.WMTS({
-                        url: 'http://srv.tianditusx.cn/KQEMAP/wmts.asmx/wmts',
-                        layer: 'KQEMAP',
-                        format: 'image/png',
-                        matrixSet:"TileMatrixSet0",
-                        tileGrid: new ol.tilegrid.WMTS({
-                            origin: ol.extent.getTopLeft(projectionExtent),
-                            resolutions: resolutions,
-                            matrixIds: matrixIds,
-                        }),
-                        style: 'default'
-                    });
                     var l1 = map.getLayers().getArray()[0];
-                    l1.setSource(s1);
-
-                    var s2 = new ol.source.WMTS({
-                        url: 'http://srv.tianditusx.cn/KQEMAPANNO/wmts.asmx/wmts',
-                        layer: 'KQEMAPANNO',
-                        format: 'image/png',
-                        matrixSet: "TileMatrixSet0",
-                        tileGrid: new ol.tilegrid.WMTS({
-                            origin: ol.extent.getTopLeft(projectionExtent),
-                            resolutions: resolutions,
-                            matrixIds: matrixIds,
-                        }),
-                        style: 'default'
-                    });
+                    l1.setSource(tileLayerSource5);
                     var l2 = map.getLayers().getArray()[1];
-                    l2.setSource(s2);
+                    l2.setSource(tileLayerSource6);
                 }
-                map.render();
             });
         }
     </script>
