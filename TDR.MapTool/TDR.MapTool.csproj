@@ -208,6 +208,7 @@
     <Content Include="Scripts\openlayer\ol-debug.js" />
     <Content Include="Scripts\openlayer\ol.css" />
     <Content Include="Scripts\openlayer\ol.js" />
+    <Content Include="Views\Default\HtmlPage1.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

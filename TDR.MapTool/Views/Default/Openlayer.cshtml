@@ -83,7 +83,7 @@
                 if (!arcgisLayer) {
                     arcgisLayer = new ol.layer.Tile({
                         source: new ol.source.TileArcGISRest({
-                            url: "http://10.80.2.155/ArcGIS/rest/services/zrwg/MapServer/"
+                            url: "http://10.80.2.155/ArcGIS/rest/services/kq20170323/MapServer/"
                         })
                     });
                 }
@@ -108,7 +108,6 @@
 
             //添加矢量图层
             $("#btnAddFeatureLayer").click(function () {
-                var projection = ol.proj.get('CGCS_2000_GK_120_3N');
                 var esrijsonFormat = new ol.format.EsriJSON();
                 var vectorSource = new ol.source.Vector();
                 var url = "http://10.80.2.155/ArcGIS/rest/services/kq20170323/MapServer/128/query?text=%E7%83%AD%E5%8A%9B&geometry=&geometryType=esriGeometryPoint&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&objectIds=&where=&time=&returnIdsOnly=false&returnGeometry=true&maxAllowableOffset=&outSR=&outFields=&f=pjson";
@@ -157,9 +156,9 @@
 
                 var iconStyle = new ol.style.Style({
                     image: new ol.style.Icon(({
-                        anchor: [0.5, 26],
+                        anchor: [0.5, 1],
                         anchorXUnits: 'fraction',
-                        anchorYUnits: 'pixels',
+                        anchorYUnits: 'fraction',
                         src: '/Content/images/mapPosition/policeCabinet_on.png'
                     }))
                 });

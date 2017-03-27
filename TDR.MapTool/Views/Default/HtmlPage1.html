@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+	<meta charset="utf-8" />
+    <link href="../../Scripts/openlayer/ol.css" rel="stylesheet" />
+    <script src="../../Scripts/openlayer/ol.js"></script>
+</head>
+<body>
+    <div>
+        <div class="leftDiv">
+            <ul>
+                <li><button id="btnAddZEWGLayer">叠加所有责任网格图层</button></li>
+                <li><button id="btnRemoveZEWGLayer">移除所有责任网格图层</button></li>
+                <li><button id="btnAddFeatureLayer">叠加责任网格矢量图</button></li>
+                <li><button id="btnAddMarker">添加单个标注</button></li>
+                <li><button id="btnAddPolyline">添加线</button></li>
+                <li><button id="btnAddCircle">添加圆</button></li>
+                <li><button id="btnAddRectangle">添加矩形</button></li>
+                <li><button id="btnAddPolygon">添加多边形</button></li>
+                <li><button id="btnDragRectangle">拉框查找</button></li>
+                <li><button id="btnDragCircle">拉圆查找</button></li>
+                <li><button id="btnAddTrack">绘制轨迹</button></li>
+                <li><button id="btnTackPlayback">轨迹回放</button></li>
+                <li>
+                    <button id="btnDrawPoint">绘制点</button><button id="btnDrawPolyline">绘制线</button><button id="btnDrawCircle">绘制圆形</button><br />
+                    <button id="btnDrawRect">绘制矩形</button>
+                    <button id="btnDrawPolygon">绘制多边形</button>
+                    <button id="btnClearDraw">退出绘制模式</button><br />
+                    <textarea id="txtDrawData" style="width:230px;height:80px; margin-top:5px;background-color:#eee;" readonly="readonly"></textarea>
+                </li>
+                <li><button id="btnClear">清空地图</button></li>
+            </ul>
+        </div>
+        <div id="map" class="map rightDiv"></div>
+    </div>
+</body>
+</html>
